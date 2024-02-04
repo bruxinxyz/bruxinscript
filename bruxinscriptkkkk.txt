@@ -1,4 +1,4 @@
-local Lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/7yhx/kwargs_Ui_Library/main/source.lua"))()
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
 
 local Players = game:GetService("Players")
 local Camera = game:GetService("Workspace").CurrentCamera
@@ -6,40 +6,42 @@ local LocalPlayer = Players.LocalPlayer
 local Mouse = LocalPlayer:GetMouse()
 
 local espEnabled = false
-local aimbotEnabled = false
+local espBoxes = {}
 
-local function createNameTag(player)
-    local NameTag = Instance.new("BillboardGui")
-    NameTag.Name = "NameTag_" .. player.UserId
-    NameTag.Size = UDim2.new(0, 100, 0, 20)
-    NameTag.AlwaysOnTop = true
-    NameTag.Adornee = player.Character:FindFirstChild("Head")
+local function createESP(player)
+    local espBox = Instance.new("BoxHandleAdornment")
+    espBox.Name = "ESPBox_" .. player.UserId
+    espBox.Size = player.Character:WaitForChild("HumanoidRootPart").Size
+    espBox.Color3 = Color3.new(0, 1, 0)
+    espBox.Transparency = 0.5
+    espBox.AlwaysOnTop = true
+    espBox.Adornee = player.Character:WaitForChild("HumanoidRootPart")
 
-    local TextLabel = Instance.new("TextLabel")
-    TextLabel.Size = UDim2.new(1, 0, 1, 0)
-    TextLabel.Text = player.Name
-    TextLabel.Font = Enum.Font.SourceSansBold
-    TextLabel.TextSize = 14
-    TextLabel.TextColor3 = Color3.new(1, 1, 1)
-    TextLabel.BackgroundTransparency = 1
+    espBox.Parent = player.Character:WaitForChild("HumanoidRootPart")
+    table.insert(espBoxes, espBox)
+end
 
-    TextLabel.Parent = NameTag
-    NameTag.Parent = Camera
+local function updateESPBoxes()
+    for _, espBox in pairs(espBoxes) do
+        if espBox.Parent then
+            espBox.Size = espBox.Adornee.Size
+        else
+            espBox:Destroy()
+        end
+    end
 end
 
 local function toggleESP(State)
     espEnabled = State
     if espEnabled then
         for _, player in pairs(Players:GetPlayers()) do
-            createNameTag(player)
+            createESP(player)
         end
     else
-        for _, player in pairs(Players:GetPlayers()) do
-            local nameTag = Camera:FindFirstChild("NameTag_" .. player.UserId)
-            if nameTag then
-                nameTag:Destroy()
-            end
+        for _, espBox in pairs(espBoxes) do
+            espBox:Destroy()
         end
+        espBoxes = {}
     end
 end
 
@@ -50,9 +52,9 @@ local function getClosestPlayer()
     for _, player in pairs(Players:GetPlayers()) do
         if player ~= LocalPlayer then
             local character = player.Character
-            if character and character:FindFirstChild("Head") then
-                local headPosition = character.Head.Position
-                local distance = (headPosition - Camera.CFrame.Position).Magnitude
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local rootPosition = character.HumanoidRootPart.Position
+                local distance = (rootPosition - Camera.CFrame.Position).Magnitude
                 if distance < shortestDistance then
                     shortestDistance = distance
                     closestPlayer = player
@@ -68,53 +70,75 @@ local function toggleAimbot(State)
     aimbotEnabled = State
 end
 
-local UI = Lib:Create{
-   Theme = "Dark",
-   Size = UDim2.new(0, 555, 0, 400)
-}
+local Window = OrionLib:MakeWindow({ Name = "ESP and Aimbot", HidePremium = false, SaveConfig = true, ConfigFolder = "Orion" })
 
-local Main = UI:Tab{
-   Name = "Main"
-}
+-- Player Tab --
 
-local Divider = Main:Divider{
-   Name = "Main shit"
-}
+local PlayerTab = Window:MakeTab({
+    Name = "Player",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-local QuitDivider = Main:Divider{
-   Name = "Quit"
-}
+local PlayerSection = PlayerTab:AddSection({
+    Name = "Player"
+})
 
--- Seção na UI para ESP Name
-local espSection = Main:Divider{
-   Name = "ESP Name"
-}
+PlayerSection:AddSlider({
+    Name = "Walkspeed",
+    Min = 16,
+    Max = 100,
+    Default = 16,
+    Color = Color3.fromRGB(255, 255, 255),
+    Increment = 1,
+    ValueName = "Walkspeed",
+    Callback = function(Value)
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+    end
+})
 
-local espToggle = espSection:Toggle{
-   Name = "Enable ESP Name",
-   Callback = toggleESP
-}
+PlayerSection:AddToggle({
+    Name = "ESP",
+    Default = false,
+    Color = Color3.fromRGB(255, 255, 255),
+    Callback = toggleESP
+})
 
--- Seção na UI para Aimbot
-local aimbotSection = Main:Divider{
-   Name = "Aimbot"
-}
+-- Settings Tab --
 
-local aimbotToggle = aimbotSection:Toggle{
-   Name = "Enable Aimbot",
-   Callback = toggleAimbot
-}
+local SettingsTab = Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
--- Seção na UI para Quit
-local Quit = QuitDivider:Button{
-   Name = "Closes the ui library.",
-   Callback = function()
-       UI:Quit{
-           Message = "Goodbye!",
-           Length = 1
-       }
-   end
-}
+local SettingsSection = SettingsTab:AddSection({
+    Name = "Settings"
+})
+
+SettingsSection:AddButton({
+    Name = "Destroy UI",
+    Callback = function()
+        OrionLib:Destroy()
+    end
+})
+
+-- Settings End --
+
+OrionLib:Init() -- UI Lib End
+
+-- Additional functions for ESP Name and Aimbot --
+Players.PlayerAdded:Connect(function(player)
+    player.CharacterAdded:Connect(function(character)
+        onCharacterAdded(character)
+    end)
+end)
+
+function onCharacterAdded(character)
+    character:WaitForChild("HumanoidRootPart").Changed:Connect(function()
+        updateESPBoxes()
+    end)
+end
 
 UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
     if not gameProcessedEvent and input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
