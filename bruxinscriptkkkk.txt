@@ -1,9 +1,8 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local DiscordLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt"))()
 
 local Players = game:GetService("Players")
 local Camera = game:GetService("Workspace").CurrentCamera
 local LocalPlayer = Players.LocalPlayer
-local Mouse = LocalPlayer:GetMouse()
 
 local espEnabled = false
 local espBoxes = {}
@@ -31,8 +30,8 @@ local function updateESPBoxes()
     end
 end
 
-local function toggleESP(State)
-    espEnabled = State
+local function toggleESP(bool)
+    espEnabled = bool
     if espEnabled then
         for _, player in pairs(Players:GetPlayers()) do
             createESP(player)
@@ -45,108 +44,76 @@ local function toggleESP(State)
     end
 end
 
-local function getClosestPlayer()
-    local closestPlayer = nil
-    local shortestDistance = math.huge
+DiscordLib:Window("HazbinScript"):Server("Main", "http://www.roblox.com/asset/?id=6031075938")
 
-    for _, player in pairs(Players:GetPlayers()) do
-        if player ~= LocalPlayer then
-            local character = player.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-                local rootPosition = character.HumanoidRootPart.Position
-                local distance = (rootPosition - Camera.CFrame.Position).Magnitude
-                if distance < shortestDistance then
-                    shortestDistance = distance
-                    closestPlayer = player
-                end
-            end
-        end
-    end
+local win = DiscordLib:Window("HazbinScript")
 
-    return closestPlayer
-end
+local serv = win:Server("Preview", "")
 
-local function toggleAimbot(State)
-    aimbotEnabled = State
-end
+local btns = serv:Channel("Buttons")
 
-local Window = OrionLib:MakeWindow({ Name = "ESP and Aimbot", HidePremium = false, SaveConfig = true, ConfigFolder = "Orion" })
-
--- Player Tab --
-
-local PlayerTab = Window:MakeTab({
-    Name = "Player",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local PlayerSection = PlayerTab:AddSection({
-    Name = "Player"
-})
-
-PlayerSection:AddSlider({
-    Name = "Walkspeed",
-    Min = 16,
-    Max = 100,
-    Default = 16,
-    Color = Color3.fromRGB(255, 255, 255),
-    Increment = 1,
-    ValueName = "Walkspeed",
-    Callback = function(Value)
-        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-    end
-})
-
-PlayerSection:AddToggle({
-    Name = "ESP",
-    Default = false,
-    Color = Color3.fromRGB(255, 255, 255),
-    Callback = toggleESP
-})
-
--- Settings Tab --
-
-local SettingsTab = Window:MakeTab({
-    Name = "Settings",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local SettingsSection = SettingsTab:AddSection({
-    Name = "Settings"
-})
-
-SettingsSection:AddButton({
-    Name = "Destroy UI",
-    Callback = function()
-        OrionLib:Destroy()
-    end
-})
-
--- Settings End --
-
-OrionLib:Init() -- UI Lib End
-
--- Additional functions for ESP Name and Aimbot --
-Players.PlayerAdded:Connect(function(player)
-    player.CharacterAdded:Connect(function(character)
-        onCharacterAdded(character)
-    end)
+btns:Button("Kill all", function()
+    DiscordLib:Notification("Notification", "Killed everyone!", "Okay!")
 end)
 
-function onCharacterAdded(character)
-    character:WaitForChild("HumanoidRootPart").Changed:Connect(function()
-        updateESPBoxes()
-    end)
-end
+btns:Seperator()
 
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if not gameProcessedEvent and input.UserInputType == Enum.UserInputType.MouseButton2 and aimbotEnabled then
-        local targetPlayer = getClosestPlayer()
-        if targetPlayer then
-            local headPosition = targetPlayer.Character.Head.Position
-            local lookVector = (headPosition - Camera.CFrame.Position).Unit
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + lookVector)
-        end
-    end
+btns:Button("Get max level", function()
+    DiscordLib:Notification("Notification", "Max level!", "Okay!")
 end)
+
+local tgls = serv:Channel("Toggles")
+
+tgls:Toggle("ESP", false, function(bool)
+    toggleESP(bool)
+end)
+
+local sldrs = serv:Channel("Sliders")
+
+local sldr = sldrs:Slider("Slide me!", 0, 1000, 400, function(value)
+    print(value)
+end)
+
+sldrs:Button("Change to 50", function()
+    sldr:Change(50)
+end)
+
+local drops = serv:Channel("Dropdowns")
+
+local drop = drops:Dropdown("Pick me!", {"Option 1", "Option 2", "Option 3", "Option 4", "Option 5"}, function(value)
+    print(value)
+end)
+
+drops:Button("Clear", function()
+    drop:Clear()
+end)
+
+drops:Button("Add option", function()
+    drop:Add("Option")
+end)
+
+local clrs = serv:Channel("Colorpickers")
+
+clrs:Colorpicker("ESP Color", Color3.fromRGB(255, 1, 1), function(color)
+    print(color)
+end)
+
+local textbs = serv:Channel("Textboxes")
+
+textbs:Textbox("Gun power", "Type here!", true, function(text)
+    print(text)
+end)
+
+local lbls = serv:Channel("Labels")
+
+lbls:Label("This is just a label.")
+
+local bnds = serv:Channel("Binds")
+
+bnds:Bind("Kill bind", Enum.KeyCode.RightShift, function()
+    print("Killed everyone!")
+end)
+
+serv:Channel("by bruxin")
+
+win:Server("Main", "http://www.roblox.com/asset/?id=6031075938")
