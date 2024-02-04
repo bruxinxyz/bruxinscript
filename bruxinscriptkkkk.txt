@@ -1,5 +1,4 @@
 local DiscordLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt"))()
-
 local Players = game:GetService("Players")
 local Camera = game:GetService("Workspace").CurrentCamera
 local LocalPlayer = Players.LocalPlayer
@@ -44,11 +43,36 @@ local function toggleESP(bool)
     end
 end
 
-DiscordLib:Window("HazbinScript"):Server("Main", "http://www.roblox.com/asset/?id=6031075938")
+local aimbotEnabled = false
 
-local win = DiscordLib:Window("HazbinScript")
+local function getClosestPlayer()
+    local closestPlayer = nil
+    local shortestDistance = math.huge
 
-local serv = win:Server("Preview", "")
+    for _, player in pairs(Players:GetPlayers()) do
+        if player ~= LocalPlayer then
+            local character = player.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+                local rootPosition = character.HumanoidRootPart.Position
+                local distance = (rootPosition - Camera.CFrame.Position).Magnitude
+                if distance < shortestDistance then
+                    shortestDistance = distance
+                    closestPlayer = player
+                end
+            end
+        end
+    end
+
+    return closestPlayer
+end
+
+local function toggleAimbot(bool)
+    aimbotEnabled = bool
+end
+
+local UI = DiscordLib:Window("HazbinScript")
+
+local serv = UI:Server("Main", "http://www.roblox.com/asset/?id=6031075938")
 
 local btns = serv:Channel("Buttons")
 
@@ -66,6 +90,10 @@ local tgls = serv:Channel("Toggles")
 
 tgls:Toggle("ESP", false, function(bool)
     toggleESP(bool)
+end)
+
+tgls:Toggle("Aimbot", false, function(bool)
+    toggleAimbot(bool)
 end)
 
 local sldrs = serv:Channel("Sliders")
@@ -116,4 +144,4 @@ end)
 
 serv:Channel("by bruxin")
 
-win:Server("Main", "http://www.roblox.com/asset/?id=6031075938")
+UI:Server("Main", "http://www.roblox.com/asset/?id=6031075938")
