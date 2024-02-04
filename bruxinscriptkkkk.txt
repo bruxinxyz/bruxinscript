@@ -8,7 +8,27 @@ OrionLib:MakeNotification({
 })
 local Window = OrionLib:MakeWindow({Name = "HazbinScript", HidePremium = false, SaveConfig = true, ConfigFolder = "HazbinScript"})
 
+-- Adicionando as opções na UI
+local SettingsTab = Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+local SettingsSection = SettingsTab:AddSection({
+    Name = "Settings"
+})
+
+-- ESP Name (Nome dos Jogadores)
 local espNameEnabled = false
+
+SettingsSection:AddToggle({
+    Name = "ESP Name",
+    Default = espNameEnabled,
+    Callback = function(enabled)
+        espNameEnabled = enabled
+    end
+})
 
 local function onPlayerAdded(player)
     if espNameEnabled and player.TeamColor ~= Players.LocalPlayer.TeamColor then
@@ -32,7 +52,16 @@ end
 
 Players.PlayerAdded:Connect(onPlayerAdded)
 
+-- ESP Box (Caixa de Visualização)
 local espBoxEnabled = false
+
+SettingsSection:AddToggle({
+    Name = "ESP Box",
+    Default = espBoxEnabled,
+    Callback = function(enabled)
+        espBoxEnabled = enabled
+    end
+})
 
 local function createBox(player)
     if espBoxEnabled and player.TeamColor ~= LocalPlayer.TeamColor then
@@ -46,7 +75,16 @@ end
 
 Players.PlayerAdded:Connect(createBox)
 
+-- Aimbot (Mira Automática)
 local aimbotEnabled = false
+
+SettingsSection:AddToggle({
+    Name = "Aimbot",
+    Default = aimbotEnabled,
+    Callback = function(enabled)
+        aimbotEnabled = enabled
+    end
+})
 
 local function aimAtHead(player)
     if aimbotEnabled and player.TeamColor ~= LocalPlayer.TeamColor then
@@ -62,39 +100,5 @@ game:GetService("RunService").Heartbeat:Connect(function()
         aimAtHead(player)
     end
 end)
-
-local SettingsTab = Window:MakeTab({
-    Name = "Settings",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-local SettingsSection = SettingsTab:AddSection({
-    Name = "Settings"
-})
-
-SettingsSection:AddToggle({
-    Name = "ESP Name",
-    Default = espNameEnabled,
-    Callback = function(enabled)
-        espNameEnabled = enabled
-    end
-})
-
-SettingsSection:AddToggle({
-    Name = "ESP Box",
-    Default = espBoxEnabled,
-    Callback = function(enabled)
-        espBoxEnabled = enabled
-    end
-})
-
-SettingsSection:AddToggle({
-    Name = "Aimbot",
-    Default = aimbotEnabled,
-    Callback = function(enabled)
-        aimbotEnabled = enabled
-    end
-})
 
 OrionLib:Init() -- UI Lib End
