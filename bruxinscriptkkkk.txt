@@ -6,6 +6,8 @@ local LocalPlayer = Players.LocalPlayer
 local espEnabled = false
 local espBoxes = {}
 
+local aimbotEnabled = false
+
 local function createESP(player)
     local espBox = Instance.new("BoxHandleAdornment")
     espBox.Name = "ESPBox_" .. player.UserId
@@ -42,8 +44,6 @@ local function toggleESP(bool)
         espBoxes = {}
     end
 end
-
-local aimbotEnabled = false
 
 local function getClosestPlayer()
     local closestPlayer = nil
@@ -145,3 +145,17 @@ end)
 serv:Channel("by bruxin")
 
 UI:Server("Main", "http://www.roblox.com/asset/?id=6031075938")
+
+-- Adição da lógica do Aimbot
+local UserInputService = game:GetService("UserInputService")
+
+UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if aimbotEnabled and not gameProcessedEvent and input.UserInputType == Enum.UserInputType.MouseButton2 then
+        local targetPlayer = getClosestPlayer()
+        if targetPlayer then
+            local headPosition = targetPlayer.Character.Head.Position
+            local lookVector = (headPosition - Camera.CFrame.Position).Unit
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + lookVector)
+        end
+    end
+end)
