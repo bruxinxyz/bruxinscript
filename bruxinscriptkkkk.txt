@@ -1,267 +1,100 @@
--- HazbinScript
-local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/cypherdh/VanisUILIB/main/.gitignore'))()
-
-local Window = library:CreateWindow("HazinScript", "V1.0", 10044538000)
-
-local Tab = Window:CreateTab("Scripts")
-
-local Page = Tab:CreateFrame("Page 1")
-
--- ESP NAME Script
-local Players = game:GetService("Players")
-local Camera = game:GetService("Workspace").CurrentCamera
+-- HazbinScript UI
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+OrionLib:MakeNotification({
+    Name = "HazbinScript",
+    Content = "HazbinScript Loaded",
+    Image = "rbxassetid://4483345998",
+    Time = 5
+})
+local Window = OrionLib:MakeWindow({Name = "HazbinScript", HidePremium = false, SaveConfig = true, ConfigFolder = "HazbinScript"})
 
 local espNameEnabled = false
-local espNameTags = {}
 
-local espEnabled = false
-local espBoxes = {}
-local espLines = {}
+local function onPlayerAdded(player)
+    if espNameEnabled and player.TeamColor ~= Players.LocalPlayer.TeamColor then
+        local nameTag = Instance.new("BillboardGui")
+        nameTag.Name = "NameTag"
+        nameTag.Adornee = player.Character:FindFirstChild("Head")
+        nameTag.Size = UDim2.new(0, 100, 0, 20)
+        nameTag.StudsOffset = Vector3.new(0, 3, 0)
+        nameTag.AlwaysOnTop = true
+        nameTag.Parent = player.Character
+
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Text = player.Name
+        nameLabel.TextColor3 = Color3.new(0, 0, 1) -- Azul
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Size = UDim2.new(1, 0, 1, 0)
+        nameLabel.Font = Enum.Font.SourceSansBold
+        nameLabel.Parent = nameTag
+    end
+end
+
+Players.PlayerAdded:Connect(onPlayerAdded)
+
 local espBoxEnabled = false
-local espBoxHandles = {}
-local espLineEnabled = false
-local espLineHandles = {}
+
+local function createBox(player)
+    if espBoxEnabled and player.TeamColor ~= LocalPlayer.TeamColor then
+        local box = Instance.new("SelectionBox")
+        box.Color3 = Color3.new(1, 0, 0) -- Vermelho
+        box.LineThickness = 0.1
+        box.Adornee = player.Character:FindFirstChild("HumanoidRootPart")
+        box.Parent = player.Character
+    end
+end
+
+Players.PlayerAdded:Connect(createBox)
 
 local aimbotEnabled = false
 
-local function createNameTag(player)
-    local NameTag = Instance.new("BillboardGui")
-    NameTag.Name = "NameTag_" .. player.UserId
-    NameTag.Size = UDim2.new(0, 100, 0, 20)
-    NameTag.AlwaysOnTop = true
-    NameTag.Adornee = player.Character:FindFirstChild("Head")
-
-    local TextLabel = Instance.new("TextLabel")
-    TextLabel.Size = UDim2.new(1, 0, 1, 0)
-    TextLabel.Text = player.Name
-    TextLabel.Font = Enum.Font.SourceSansBold
-    TextLabel.TextSize = 14
-    TextLabel.TextColor3 = Color3.new(1, 1, 1)
-    TextLabel.BackgroundTransparency = 1
-
-    TextLabel.Parent = NameTag
-    NameTag.Parent = Camera
-
-    table.insert(espNameTags, NameTag)
-end
-
-local function updateESPNameTags()
-    for _, NameTag in pairs(espNameTags) do
-        if NameTag.Parent then
-            NameTag.Adornee = NameTag.Parent:FindFirstChild("Head")
-        else
-            NameTag:Destroy()
+local function aimAtHead(player)
+    if aimbotEnabled and player.TeamColor ~= LocalPlayer.TeamColor then
+        local targetHead = player.Character:FindFirstChild("Head")
+        if targetHead then
+            LocalPlayer.Character:WaitForChild("HumanoidRootPart").CFrame = targetHead.CFrame
         end
     end
 end
 
-local function toggleESPName(bool)
-    espNameEnabled = bool
-    if espNameEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createNameTag(player)
-        end
-    else
-        for _, NameTag in pairs(espNameTags) do
-            NameTag:Destroy()
-        end
-        espNameTags = {}
-    end
-end
-
-local function createESP(player)
-    local espBox = Instance.new("BoxHandleAdornment")
-    espBox.Name = "ESPBox_" .. player.UserId
-    espBox.Size = player.Character:WaitForChild("HumanoidRootPart").Size
-    espBox.Color3 = Color3.new(0, 1, 0)
-    espBox.Transparency = 0.5
-    espBox.AlwaysOnTop = true
-    espBox.Adornee = player.Character:WaitForChild("HumanoidRootPart")
-
-    espBox.Parent = player.Character:WaitForChild("HumanoidRootPart")
-    table.insert(espBoxes, espBox)
-
-    local espLine = Instance.new("Part")
-    espLine.Anchored = true
-    espLine.Size = Vector3.new(1, 5, 1) -- Adjust the length of the line
-    espLine.BrickColor = BrickColor.new("Bright red") -- Choose your desired color
-    espLine.Transparency = 0.5
-    espLine.Parent = player.Character
-
-    table.insert(espLines, espLine)
-
-    local connection
-    connection = player.CharacterAdded:Connect(function()
-        if player.Character then
-            espBox.Parent = player.Character:WaitForChild("HumanoidRootPart")
-            espLine.Parent = player.Character
-        else
-            connection:Disconnect()
-        end
-    end)
-end
-
-local function updateESPBoxes()
-    for _, espBox in pairs(espBoxes) do
-        if espBox.Parent then
-            espBox.Size = espBox.Adornee.Size
-        else
-            espBox:Destroy()
-        end
-    end
-end
-
-local function toggleESP(bool)
-    espEnabled = bool
-    if espEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createESP(player)
-        end
-    else
-        for _, espBox in pairs(espBoxes) do
-            espBox:Destroy()
-        end
-        espBoxes = {}
-
-        for _, espLine in pairs(espLines) do
-            espLine:Destroy()
-        end
-        espLines = {}
-    end
-end
-
-local function createBox(player)
-    local Box = Instance.new("BoxHandleAdornment")
-    Box.Name = "ESPBox_" .. player.UserId
-    Box.Size = player.Character:WaitForChild("HumanoidRootPart").Size
-    Box.Color3 = Color3.new(1, 0, 0) -- Choose your desired color
-    Box.Transparency = 0.5
-    Box.Adornee = player.Character:WaitForChild("HumanoidRootPart")
-    Box.Parent = player.Character
-
-    local connection
-    connection = player.CharacterAdded:Connect(function()
-        if player.Character then
-            Box.Parent = player.Character:WaitForChild("HumanoidRootPart")
-        else
-            connection:Disconnect()
-        end
-    end)
-end
-
-local function toggleESPBox(bool)
-    espBoxEnabled = bool
-    if espBoxEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createBox(player)
-        end
-    else
-        for _, espBox in pairs(espBoxHandles) do
-            espBox:Destroy()
-        end
-        espBoxHandles = {}
-    end
-end
-
-local function createLine(player)
-    local espLine = Instance.new("Part")
-    espLine.Name = "ESPLine_" .. player.UserId
-    espLine.Anchored = true
-    espLine.Size = Vector3.new(1, 5, 1) -- Adjust the length of the line
-    espLine.BrickColor = BrickColor.new("Bright red") -- Choose your desired color
-    espLine.Transparency = 0.5
-    espLine.Parent = player.Character
-
-    table.insert(espLineHandles, espLine)
-
-    local connection
-    connection = player.CharacterAdded:Connect(function()
-        if player.Character then
-            espLine.Parent = player.Character
-        else
-            connection:Disconnect()
-        end
-    end)
-end
-
-local function updateESPLineHandles()
-    for _, espLine in pairs(espLineHandles) do
-        if espLine.Parent then
-            -- Update the position or length of the line if needed
-        else
-            espLine:Destroy()
-        end
-    end
-end
-
-local function toggleESPLine(bool)
-    espLineEnabled = bool
-    if espLineEnabled then
-        for _, player in pairs(Players:GetPlayers()) do
-            createLine(player)
-        end
-    else
-        for _, espLine in pairs(espLineHandles) do
-            espLine:Destroy()
-        end
-        espLineHandles = {}
-    end
-end
-
--- Adição da lógica do Aimbot
-local UserInputService = game:GetService("UserInputService")
-
-UserInputService.InputBegan:Connect(function(input, gameProcessedEvent)
-    if aimbotEnabled and not gameProcessedEvent and input.UserInputType == Enum.UserInputType.MouseButton2 then
-        local targetPlayer = getClosestPlayer()
-        if targetPlayer then
-            local headPosition = targetPlayer.Character.Head.Position
-            local lookVector = (headPosition - Camera.CFrame.Position).Unit
-            Camera.CFrame = CFrame.new(Camera.CFrame.Position, Camera.CFrame.Position + lookVector)
-        end
+game:GetService("RunService").Heartbeat:Connect(function()
+    for _, player in pairs(Players:GetPlayers()) do
+        aimAtHead(player)
     end
 end)
 
--- Adição da lógica do ESP LINE
-local function createLine(player)
-    local espLine = Instance.new("Part")
-    espLine.Name = "ESPLine_" .. player.UserId
-    espLine.Anchored = true
-    espLine.Size = Vector3.new(1, 5, 1) -- Adjust the length of the line
-    espLine.BrickColor = BrickColor.new("Bright red") -- Choose your desired color
-    espLine.Transparency = 0.5
-    espLine.Parent = player.Character
+local SettingsTab = Window:MakeTab({
+    Name = "Settings",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
 
-    table.insert(espLineHandles, espLine)
+local SettingsSection = SettingsTab:AddSection({
+    Name = "Settings"
+})
 
-    local connection
-    connection = player.CharacterAdded:Connect(function()
-        if player.Character then
-            espLine.Parent = player.Character
-        else
-            connection:Disconnect()
-        end
-    end)
-end
-
-local function updateESPLineHandles()
-    for _, espLine in pairs(espLineHandles) do
-        if espLine.Parent then
-            -- Update the position or length of the line if needed
-        else
-            espLine:Destroy()
-        end
+SettingsSection:AddToggle({
+    Name = "ESP Name",
+    Default = espNameEnabled,
+    Callback = function(enabled)
+        espNameEnabled = enabled
     end
-end
+})
 
-for _, player in pairs(Players:GetPlayers()) do
-    createLine(player)
-end
+SettingsSection:AddToggle({
+    Name = "ESP Box",
+    Default = espBoxEnabled,
+    Callback = function(enabled)
+        espBoxEnabled = enabled
+    end
+})
 
-Players.PlayerAdded:Connect(function(player)
-    createLine(player)
-end)
+SettingsSection:AddToggle({
+    Name = "Aimbot",
+    Default = aimbotEnabled,
+    Callback = function(enabled)
+        aimbotEnabled = enabled
+    end
+})
 
-updateESPBoxes()
-updateESPNameTags()
-updateESPLineHandles()
+OrionLib:Init() -- UI Lib End
