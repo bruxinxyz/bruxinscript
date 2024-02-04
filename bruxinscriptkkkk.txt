@@ -1,7 +1,15 @@
-local DiscordLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/UI-Libs/main/discord%20lib.txt"))()
+-- HazbinScript
+local library = loadstring(game:HttpGet('https://raw.githubusercontent.com/cypherdh/VanisUILIB/main/.gitignore'))()
+
+local Window = library:CreateWindow("HazinScript", "V1.0", 10044538000)
+
+local Tab = Window:CreateTab("Scripts")
+
+local Page = Tab:CreateFrame("Page 1")
+
+-- ESP NAME Script
 local Players = game:GetService("Players")
 local Camera = game:GetService("Workspace").CurrentCamera
-local LocalPlayer = Players.LocalPlayer
 
 local espNameEnabled = false
 local espNameTags = {}
@@ -199,90 +207,6 @@ local function toggleESPLine(bool)
         espLineHandles = {}
     end
 end
-
-DiscordLib:Window("HazbinScript"):Server("Main", "http://www.roblox.com/asset/?id=6031075938")
-
-local win = DiscordLib:Window("HazbinScript")
-
-local serv = win:Server("Preview", "")
-
-local btns = serv:Channel("Buttons")
-
-btns:Button("Kill all", function()
-    DiscordLib:Notification("Notification", "Killed everyone!", "Okay!")
-end)
-
-btns:Seperator()
-
-btns:Button("Get max level", function()
-    DiscordLib:Notification("Notification", "Max level!", "Okay!")
-end)
-
-local tgls = serv:Channel("Toggles")
-
-tgls:Toggle("ESP Name", false, function(bool)
-    toggleESPName(bool)
-end)
-
-tgls:Toggle("ESP", false, function(bool)
-    toggleESP(bool)
-end)
-
-tgls:Toggle("ESP Box", false, function(bool)
-    toggleESPBox(bool)
-end)
-
-tgls:Toggle("ESP Line", false, function(bool)
-    toggleESPLine(bool)
-end)
-
-local sldrs = serv:Channel("Sliders")
-
-local sldr = sldrs:Slider("Slide me!", 0, 1000, 400, function(value)
-    print(value)
-end)
-
-sldrs:Button("Change to 50", function()
-    sldr:Change(50)
-end)
-
-local drops = serv:Channel("Dropdowns")
-
-local drop = drops:Dropdown("Pick me!", {"Option 1", "Option 2", "Option 3", "Option 4", "Option 5"}, function(value)
-    print(value)
-end)
-
-drops:Button("Clear", function()
-    drop:Clear()
-end)
-
-drops:Button("Add option", function()
-    drop:Add("Option")
-end)
-
-local clrs = serv:Channel("Colorpickers")
-
-clrs:Colorpicker("ESP Color", Color3.fromRGB(255, 1, 1), function(color)
-    print(color)
-end)
-
-local textbs = serv:Channel("Textboxes")
-
-textbs:Textbox("Gun power", "Type here!", true, function(text)
-    print(text)
-end)
-
-local lbls = serv:Channel("Labels")
-
-lbls:Label("This is just a label.")
-
-local bnds = serv:Channel("Binds")
-
-bnds:Bind("Kill bind", Enum.KeyCode.RightShift, function()
-    print("Killed everyone!")
-end)
-
-serv:Channel("by bruxin")
 
 -- Adição da lógica do Aimbot
 local UserInputService = game:GetService("UserInputService")
